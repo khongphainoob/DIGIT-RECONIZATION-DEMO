@@ -3,21 +3,69 @@ const ctx = canvas.getContext('2d');
 const clearButton = document.getElementById('clear');
 const predictButton = document.getElementById('predict');
 ctx.fillStyle = 'black';
+ctx.strokeStyle = 'white'; // Màu vẽ
+ctx.lineWidth = 13;
+ctx.lineCap = 'round';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 let isDrawing = false;
 clearButton.addEventListener('click', clearCanvas);
 predictButton.addEventListener('click', predict);
-canvas.addEventListener('mousedown', () => isDrawing = true);
-canvas.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mousedown', startDraw);
 canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDraw);
+canvas.addEventListener('mouseleave', stopDraw);
+canvas.addEventListener("touchstart", function(e) {
+  e.preventDefault(); // ngăn cuộn trang
+  startDraw(e);
+});
+
+canvas.addEventListener("touchmove", function(e) {
+  e.preventDefault(); // ngăn cuộn trang
+  draw(e);
+});
+
+canvas.addEventListener("touchend", function(e) {
+  e.preventDefault();
+  stopDraw();
+});
+
+function getPos(e) {
+  if (e.touches) {
+    return { x: e.touches[0].clientX - canvas.offsetLeft,
+             y: e.touches[0].clientY - canvas.offsetTop };
+  } else {
+    return { x: e.clientX - canvas.offsetLeft,
+             y: e.clientY - canvas.offsetTop };
+  }
+}
+
+function startDraw(e) {
+  drawing = true;
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+}
 
 function draw(e) {
-    if(!isDrawing) return;
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(e.offsetX, e.offsetY, 8, 0, Math.PI*2.5);
-    ctx.fill();
+  if (!drawing) return;
+  const pos = getPos(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
 }
+
+function stopDraw() {
+  drawing = false;
+  ctx.closePath();
+}
+
+
+// function draw(e) {
+//     if(!isDrawing) return;
+//     ctx.fillStyle = 'white';
+//     ctx.beginPath();
+//     ctx.arc(e.offsetX, e.offsetY, 8, 0, Math.PI*2.5);
+//     ctx.fill();
+// }
 
 function clearCanvas() {
     ctx.fillStyle = 'black';
